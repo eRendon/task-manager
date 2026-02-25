@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -16,17 +16,15 @@ import { Task } from '../models/task.model';
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonCheckbox, IonButton, IonIcon, IonInput, IonButtons],
+  imports: [CommonModule, FormsModule, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonCheckbox, IonButton, IonIcon, IonInput],
 })
 export class HomePage implements OnInit {
   tasks: Task[] = [];
   newTaskTitle: string = '';
-
-  constructor(private dataService: DataService) {
-    addIcons({ trashOutline, add });
-  }
+  private dataService: DataService = inject(DataService);
 
   async ngOnInit() {
+    addIcons({ trashOutline, add });
     this.tasks = await this.dataService.getTasks();
   }
 
