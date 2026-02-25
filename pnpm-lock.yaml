@@ -32,6 +32,9 @@ importers:
       '@angular/router':
         specifier: ^20.0.0
         version: 20.3.16(@angular/common@20.3.16(@angular/core@20.3.16(@angular/compiler@20.3.16)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.16(@angular/compiler@20.3.16)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@20.3.16(@angular/animations@20.3.16(@angular/core@20.3.16(@angular/compiler@20.3.16)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@20.3.16(@angular/core@20.3.16(@angular/compiler@20.3.16)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.16(@angular/compiler@20.3.16)(rxjs@7.8.2)(zone.js@0.15.1)))(rxjs@7.8.2)
+      '@capacitor/android':
+        specifier: ^8.1.0
+        version: 8.1.0(@capacitor/core@8.1.0)
       '@capacitor/app':
         specifier: 8.0.1
         version: 8.0.1(@capacitor/core@8.1.0)
@@ -41,6 +44,9 @@ importers:
       '@capacitor/haptics':
         specifier: 8.0.1
         version: 8.0.1(@capacitor/core@8.1.0)
+      '@capacitor/ios':
+        specifier: ^8.1.0
+        version: 8.1.0(@capacitor/core@8.1.0)
       '@capacitor/keyboard':
         specifier: 8.0.1
         version: 8.0.1(@capacitor/core@8.1.0)
@@ -969,6 +975,11 @@ packages:
     resolution: {integrity: sha512-LwdZHpScM4Qz8Xw2iKSzS+cfglZzJGvofQICy7W7v4caru4EaAmyUuO6BGrbyQ2mYV11W0U8j5mBhd14dd3B0A==}
     engines: {node: '>=6.9.0'}
 
+  '@capacitor/android@8.1.0':
+    resolution: {integrity: sha512-z0acTPxj5DCy/U2FU7w+GA93oC+wdyKnsOcRg5rutDmSYa8Do1tzYqApKgf+hnuTNPbtrCTHp0Zy1cLiK/4MEw==}
+    peerDependencies:
+      '@capacitor/core': ^8.1.0
+
   '@capacitor/app@8.0.1':
     resolution: {integrity: sha512-yeG3yyA0ETKqvgqexwHMBlmVOF13A1hRXzv/km0Ptv5TrNIZvZJK4MTI3uiqvnbHrzoJGP5DwWAjEXEfi90v3Q==}
     peerDependencies:
@@ -986,6 +997,11 @@ packages:
     resolution: {integrity: sha512-8v8rowLBMeb3CryqoQvXndwyUsoi4pPXf0qFw7IGA4D32Uk7+K6juN2SjRowqunoovkvvbFmU9TD7JIAz2zmFw==}
     peerDependencies:
       '@capacitor/core': '>=8.0.0'
+
+  '@capacitor/ios@8.1.0':
+    resolution: {integrity: sha512-wPaQ8ayL0UY+SxydZbrmfzPs8TryZVEB6hrL/XBnXxQtb6rpEmIy/3GIltPwM+/T4m/IuaSDZOToWK65ruC00g==}
+    peerDependencies:
+      '@capacitor/core': ^8.1.0
 
   '@capacitor/keyboard@8.0.1':
     resolution: {integrity: sha512-HDf4qrvvhLRMsgBoqeqIld6hP8JMK/WPbCYMvz8ajhY6TaibYt6B+NQyky4oIPCOfHTz5OcVsuHkbb8fQvGDAg==}
@@ -6689,6 +6705,10 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
 
+  '@capacitor/android@8.1.0(@capacitor/core@8.1.0)':
+    dependencies:
+      '@capacitor/core': 8.1.0
+
   '@capacitor/app@8.0.1(@capacitor/core@8.1.0)':
     dependencies:
       '@capacitor/core': 8.1.0
@@ -6720,6 +6740,10 @@ snapshots:
       tslib: 2.8.1
 
   '@capacitor/haptics@8.0.1(@capacitor/core@8.1.0)':
+    dependencies:
+      '@capacitor/core': 8.1.0
+
+  '@capacitor/ios@8.1.0(@capacitor/core@8.1.0)':
     dependencies:
       '@capacitor/core': 8.1.0
 
