@@ -1,5 +1,43 @@
-export interface Task {
+export type TaskStatus = 'backlog' | 'new' | 'active' | 'impediment' | 'closed';
+export type TaskPriority = 'low' | 'medium' | 'high';
+
+export interface Category {
   id: number;
-  title: string;
-  completed: boolean;
+  name: string;
 }
+
+export interface Task {
+  id: string;
+  title?: string;
+  description?: string;
+  completed?: boolean;
+  status?: TaskStatus;
+  categoryId?: number;
+  priority?: TaskPriority;
+  dueDate?: string;
+}
+
+export class TaskModel implements Task {
+  id: string;
+  title?: string;
+  description?: string;
+  completed?: boolean;
+  status?: TaskStatus;
+  categoryId?: number;
+  priority?: TaskPriority;
+  dueDate?: string;
+
+  constructor(task: Omit<Task, 'id'>) {
+    this.id = TaskModel.generateId();
+    Object.assign(this, task);
+  }
+
+  private static generateId(): string {
+    const numbers = Math.floor(1000000 + Math.random() * 9000000);
+    const letters = Array.from({ length: 2 }, () =>
+      String.fromCharCode(65 + Math.floor(Math.random() * 26))
+    ).join('');
+    return `${numbers}${letters}`;
+  }
+ }
+
