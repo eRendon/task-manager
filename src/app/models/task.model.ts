@@ -1,3 +1,5 @@
+import { User } from "./user.model";
+
 export type TaskStatus = 'backlog' | 'new' | 'active' | 'impediment' | 'closed';
 export type TaskPriority = 'low' | 'medium' | 'high';
 
@@ -15,6 +17,12 @@ export interface Task {
   categoryId?: number;
   priority?: TaskPriority;
   dueDate?: string;
+  assignee?: TaskAssignment;
+}
+
+export interface TaskAssignment {
+  user: User;
+  imageUrl?: string;
 }
 
 export class TaskModel implements Task {
@@ -26,6 +34,7 @@ export class TaskModel implements Task {
   categoryId?: number;
   priority?: TaskPriority;
   dueDate?: string;
+  assignee?: TaskAssignment;
 
   constructor(task: Omit<Task, 'id'>) {
     this.id = TaskModel.generateId();

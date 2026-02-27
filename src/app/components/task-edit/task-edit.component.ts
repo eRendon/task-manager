@@ -47,4 +47,7 @@ export class TaskEditComponent implements OnInit{
     });
   }
 
+  closeWithoutSave() {
+    this.modalCtrl.dismiss();
+  }
 }
