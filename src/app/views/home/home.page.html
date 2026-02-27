@@ -1,0 +1,63 @@
+<ion-header class="ion-no-border">
+  <div class="flex items-center bg-white dark:bg-slate-900 px-4 py-3 justify-between border-b border-slate-200 dark:border-slate-800">
+    <div class="flex items-center gap-3">
+      <ion-icon name="menu-outline" class="text-2xl text-primary"></ion-icon>
+      <h1 class="text-lg font-bold leading-tight tracking-tight text-slate-900 dark:text-white">Task Manager</h1>
+    </div>
+    <div class="flex items-center gap-4">
+      <button class="flex items-center justify-center">
+        <ion-icon name="search-outline" class="text-2xl text-slate-600 dark:text-slate-400"></ion-icon>
+      </button>
+      <button class="flex items-center justify-center">
+        <ion-icon name="notifications-outline" class="text-2xl text-slate-600 dark:text-slate-400"></ion-icon>
+      </button>
+    </div>
+  </div>
+</ion-header>
+
+<ion-content class="bg-background-light dark:bg-background-dark font-display">
+
+  <!-- Kanban Column Tabs -->
+  <nav class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-10">
+    <div class="flex px-4 overflow-x-auto no-scrollbar">
+      <a *ngFor="let col of columns"
+         (click)="setActiveStatus(col.value)"
+         [class.active-tab]="activeStatus === col.value"
+         [class.text-slate-500!]="activeStatus !== col.value"
+         [class.dark:text-slate-400!]="activeStatus !== col.value"
+         [class]="getStatusColor(col.value)"
+         class="flex flex-col items-center justify-center pb-3 pt-4 px-4 whitespace-nowrap cursor-pointer transition-colors">
+        <p class="text-sm" [class.font-bold]="activeStatus === col.value" [class.font-medium]="activeStatus !== col.value">
+          {{ col.label }} ({{ getTasksByStatus(col.value).length }})
+        </p>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main Content Area (Task List) -->
+  <main class="flex-1 overflow-y-auto p-4 space-y-4 pb-24">
+
+    <app-task
+      *ngFor="let task of getTasksByStatus(activeStatus)"
+      [task]="task"
+      [categories]="categories"
+      (edit)="openEditTask($event)"
+      (detail)="openDetailTask($event)"
+      (delete)="deleteTask($event)">
+    </app-task>
+
+    <!-- Empty State -->
+    <div *ngIf="getTasksByStatus(activeStatus).length === 0" class="text-center py-10 text-slate-400">
+      <p>No hay tareas en esta columna</p>
+    </div>
+
+  </main>
+
+  <!-- Floating Action Button -->
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end" class="mb-4 mr-2">
+    <ion-fab-button color="primary" (click)="openCreateTask()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+</ion-content>

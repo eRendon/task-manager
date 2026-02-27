@@ -1,0 +1,75 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar class="bg-background-light dark:bg-background-dark">
+    <ion-buttons slot="start">
+      <ion-button (click)="closeModal()">
+        <ion-icon slot="icon-only" name="arrow-back-outline" class="text-slate-900 dark:text-slate-100"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight">{{task ? 'Editar Tarea' : 'Nueva Tarea'}}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="closeModal()">
+        <ion-icon slot="icon-only" name="checkmark-outline" class="text-primary text-2xl"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="bg-background-light dark:bg-background-dark font-display">
+  <!-- Task Title Section -->
+  <div class="px-4 pt-6 pb-4">
+    <input
+      [(ngModel)]="model.title"
+      class="w-full bg-transparent text-slate-900 dark:text-slate-100 tracking-tight text-3xl font-bold leading-tight border-none focus:ring-0 p-0 placeholder:text-slate-400"
+      placeholder="Título de la tarea"
+    />
+    <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">ID: {{ model.id === '0' ? 'Nueva Tarea' : model.id }}</p>
+  </div>
+
+  <!-- Status & Category Row -->
+  <div class=" px-4 py-3">
+    <ion-list class="flex flex-col flex-1">
+      <ion-item>
+        <ion-select label="Estado" label-placement="floating" fill="outline"
+          [(ngModel)]="model.status">
+          <ion-select-option value="new">Nuevo</ion-select-option>
+          <ion-select-option value="active">Activo</ion-select-option>
+          <ion-select-option value="impediment">Impedimento</ion-select-option>
+          <ion-select-option value="closed">Cerrado</ion-select-option>
+          <ion-select-option value="backlog">Backlog</ion-select-option>
+        </ion-select>
+      </ion-item>
+    </ion-list>
+    <ion-list class="flex flex-col flex-1">
+      <ion-item>
+        <ion-select label="Categoría" label-placement="floating" fill="outline"
+          [(ngModel)]="model.categoryId">
+          <ion-select-option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</ion-select-option>
+          <ion-select-option value="undefined">Sin Categoría</ion-select-option>
+        </ion-select>
+      </ion-item>
+    </ion-list>
+    <ion-list class="flex flex-col flex-1">
+      <ion-item>
+        <ion-select label="Prioridad" label-placement="floating" fill="outline"
+          [(ngModel)]="model.priority">
+          <ion-select-option value="low">Baja</ion-select-option>
+          <ion-select-option value="medium">Media</ion-select-option>
+          <ion-select-option value="high">Alta</ion-select-option>
+        </ion-select>
+      </ion-item>
+    </ion-list>
+  </div>
+
+  <!-- Description Area -->
+  <div class="px-4 py-6">
+    <h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold mb-3">Descripción</h3>
+    <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
+      <textarea
+        [(ngModel)]="model.description"
+        rows="6"
+        class="w-full bg-transparent text-slate-600 dark:text-slate-300 leading-relaxed text-sm border-none focus:ring-0 p-0 resize-none"
+        placeholder="Añadir una descripción..."
+      ></textarea>
+    </div>
+  </div>
+</ion-content>
