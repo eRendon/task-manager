@@ -1,4 +1,4 @@
-import { Component, inject, Input, OnInit } from '@angular/core';
+import { Component, inject, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -16,6 +16,7 @@ import { Task, Category, TaskModel } from '../../models/task.model';
   imports: [CommonModule, FormsModule, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonIcon,
     IonItem, IonList, IonSelect, IonSelectOption
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TaskEditComponent implements OnInit{
   @Input() task?: Task;
