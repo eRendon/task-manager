@@ -40,7 +40,7 @@
          [class]="getStatusColor(col.value)"
          class="flex flex-col items-center justify-center pb-3 pt-4 px-4 whitespace-nowrap cursor-pointer transition-colors">
         <p class="text-sm" [class.font-bold]="activeStatus === col.value" [class.font-medium]="activeStatus !== col.value">
-          {{ col.label }} ({{ getTasksByStatus(col.value).length }})
+          {{ col.label }} ({{ taskCounts[col.value] || 0 }})
         </p>
       </a>
     </div>
@@ -50,7 +50,7 @@
   <main class="flex-1 overflow-y-auto p-4 space-y-4 pb-24">
 
     <app-task
-      *ngFor="let task of getTasksByStatus(activeStatus)"
+      *ngFor="let task of visibleTasks; trackBy: trackByTask"
       [task]="task"
       [categories]="categories"
       (edit)="openEditTask($event)"
@@ -59,7 +59,7 @@
     </app-task>
 
     <!-- Empty State -->
-    <div *ngIf="getTasksByStatus(activeStatus).length === 0" class="text-center py-10 text-slate-400">
+    <div *ngIf="visibleTasks.length === 0" class="text-center py-10 text-slate-400">
       <p>No hay tareas en esta columna</p>
     </div>
 

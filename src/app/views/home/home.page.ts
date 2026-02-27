@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -21,11 +21,14 @@ import { RemoteConfigService } from '@/services/remote-config.service';
   imports: [
     CommonModule, FormsModule, IonHeader, IonContent, IonFab, IonFabButton, IonIcon, TaskComponent, IonSearchbar
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HomePage {
   tasks: Task[] = [];
   categories: Category[] = [];
   filteredTasks: Task[] = [];
+  visibleTasks: Task[] = []; // Tareas filtradas por estado para la vista actual
+  taskCounts: Record<string, number> = {}; // Conteo pre-calculado para las pestañas
 
   showSearch: boolean = false;
   searchQuery: string = '';
@@ -48,6 +51,7 @@ export class HomePage {
   private dataService: DataService = inject(DataService);
   private remoteConfigService: RemoteConfigService = inject(RemoteConfigService);
   private modalCtrl: ModalController = inject(ModalController);
+  private cdr = inject(ChangeDetectorRef);
   showAddTaskButton: boolean = true;
 
   constructor() {
@@ -60,10 +64,14 @@ export class HomePage {
     await this.remoteConfigService.initialize();
     this.showAddTaskButton = this.remoteConfigService.getEnableAddTask();
     this.applyFilter();
+    console.log('showAddTaskButton', this.showAddTaskButton)
+    this.updateView();
+    this.cdr.markForCheck();
   }
 
   setActiveStatus(status: TaskStatus) {
     this.activeStatus = status;
+    this.updateVisibleTasks();
   }
 
   async addTask(): Promise<void> {
@@ -80,15 +88,20 @@ export class HomePage {
     this.tasks.push(newTask);
     this.newTaskTitle = '';
     await this.dataService.saveTasks(this.tasks);
-    this.applyFilter();
+    this.updateView();
+    this.cdr.markForCheck();
   }
 
-  /** Cambia el estado de una tarea y actualiza su estado de completado en consecuencia.
-   * @param task La tarea a actualizar.
-   */
-  async onStatusChange(task: Task): Promise<void> {
+  async toggleTask(task: Task) {
+    task.status = task.completed ? 'closed' : 'active';
+    await this.dataService.saveTasks(this.tasks);
+    this.updateView(); // Actualizar para mover la tarea si cambia de estado
+  }
+
+  async onStatusChange(task: Task) {
     task.completed = task.status === 'closed';
     await this.dataService.saveTasks(this.tasks);
+    this.updateView();
   }
 
   /** Elimina una tarea de la lista y actualiza el almacenamiento.
@@ -97,7 +110,8 @@ export class HomePage {
   async deleteTask(task: Task): Promise<void> {
     this.tasks = this.tasks.filter(t => t.id !== task.id);
     await this.dataService.saveTasks(this.tasks);
-    this.applyFilter();
+    this.updateView();
+    this.cdr.markForCheck();
   }
 
   /** Abre el modal de edición para una tarea existente.
@@ -118,6 +132,7 @@ export class HomePage {
     if (data?.task) {
       this.editingTask = data.task;
       this.saveEdit();
+      this.cdr.markForCheck();
     }
   }
 
@@ -136,6 +151,7 @@ export class HomePage {
     if (data?.task) {
       this.editingTask = data.task;
       this.addTask();
+      this.cdr.markForCheck();
     }
   }
 
@@ -152,8 +168,10 @@ export class HomePage {
     if (index !== -1) {
       this.tasks[index] = this.editingTask;
       await this.dataService.saveTasks(this.tasks);
-      this.applyFilter();
+      this.updateView();
     }
+    this.editingTask = null;
+    this.cdr.markForCheck();
   }
 
   /** Aplica los filtros de categoría y búsqueda a la lista de tareas. */
@@ -180,15 +198,29 @@ export class HomePage {
     this.applyFilter();
   }
 
-  /** Obtiene el nombre de una categoría por su ID. */
+  updateView() {
+    this.applyFilter();
+    this.updateVisibleTasks();
+    this.updateTaskCounts();
+  }
+
+  updateVisibleTasks() {
+    this.visibleTasks = this.filteredTasks.filter(t => t.status === this.activeStatus);
+  }
+
+  updateTaskCounts() {
+    this.columns.forEach(col => {
+      this.taskCounts[col.value] = this.filteredTasks.filter(t => t.status === col.value).length;
+    });
+  }
+
   getCategoryName(id?: number): string {
     if (!id) return '';
     return this.categories.find(c => c.id === id)?.name || '';
   }
 
-  /** Obtiene las tareas de un estado específico. */
-  getTasksByStatus(status: TaskStatus): Task[] {
-    return this.filteredTasks.filter(t => t.status === status);
+  trackByTask(index: number, task: Task): string {
+    return task.id;
   }
 
   /** Obtiene el color de un estado de tarea. */

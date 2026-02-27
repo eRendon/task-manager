@@ -1,4 +1,4 @@
-import { Component, EventEmitter, inject, Input, Output, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy, OnInit, inject} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -13,8 +13,8 @@ import { Task, Category, TaskModel } from '../../models/task.model';
   templateUrl: './task-detail.component.html',
   styleUrls: ['./task-detail.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonButtons, IonIcon, IonFooter
-  ]
+  imports: [CommonModule, FormsModule, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonButtons, IonIcon, IonFooter],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TaskDetailComponent implements OnInit {
   @Input() task!: Task;

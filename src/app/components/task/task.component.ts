@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -11,7 +11,8 @@ import { IonChip } from '@ionic/angular/standalone';
   templateUrl: './task.component.html',
   styleUrls: ['./task.component.scss'],
   standalone: true,
-  imports: [CommonModule, IonIcon, IonChip ]
+  imports: [CommonModule, IonIcon, IonChip ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TaskComponent {
   @Input() task!: Task;
