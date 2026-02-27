@@ -11,6 +11,7 @@ import { Task, Category, TaskStatus, TaskModel } from '../../models/task.model';
 import { TaskComponent } from '../../components/task/task.component';
 import { TaskEditComponent } from '@/components/task-edit/task-edit.component';
 import { TaskDetailComponent } from '@/components/task-detail/task-detail.component';
+import { RemoteConfigService } from '@/components/task-edit/remote-config.service';
 
 @Component({
   selector: 'app-home',
@@ -45,7 +46,9 @@ export class HomePage {
   isDetailModal: boolean = false; // Para diferenciar entre edición y detalle
   detailTask: Task | null = null;
   private dataService: DataService = inject(DataService);
+  private remoteConfigService: RemoteConfigService = inject(RemoteConfigService);
   private modalCtrl: ModalController = inject(ModalController);
+  showAddTaskButton: boolean = true;
 
   constructor() {
     addIcons({ trashOutline, add, createOutline, menuOutline, searchOutline, notificationsOutline, ellipsisHorizontalOutline });
@@ -54,6 +57,9 @@ export class HomePage {
   async ionViewWillEnter() {
     this.tasks = await this.dataService.getTasks();
     this.categories = await this.dataService.getCategories();
+    await this.remoteConfigService.initialize();
+    this.showAddTaskButton = this.remoteConfigService.getEnableAddTask();
+    console.log('showAddTaskButton', this.showAddTaskButton)
     this.applyFilter();
   }
 
