@@ -26,7 +26,6 @@ export class TaskComponent {
   }
 
   getCategoryName(id?: number): string {
-    console.log('la task', this.task)
     if (!id) return '';
     return this.categories.find(c => c.id === id)?.name || '';
   }

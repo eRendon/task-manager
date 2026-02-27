@@ -2,13 +2,13 @@
 <ion-header class="ion-no-border">
   <ion-toolbar class="dark:bg-background-dark">
     <ion-buttons slot="start">
-      <ion-button (click)="close.emit()">
+      <ion-button (click)="closeWithoutSave()">
         <ion-icon slot="icon-only" name="arrow-back-outline" class="text-slate-900 dark:text-slate-100"></ion-icon>
       </ion-button>
     </ion-buttons>
     <ion-title class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight">Task Details</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="save.emit()">
+      <ion-button (click)="closeModal()">
         <ion-icon slot="icon-only" name="checkmark-outline" class="text-primary text-2xl"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -20,11 +20,11 @@
   <div class="bg-white/80">
     <div class="px-4 pt-6 pb-4 ">
     <input
-      [(ngModel)]="task.title"
+      [(ngModel)]="model.title"
       class="w-full bg-transparent text-slate-900 dark:text-slate-100 tracking-tight text-3xl font-bold leading-tight border-none focus:ring-0 p-0 placeholder:text-slate-400"
       placeholder="Task Title"
     />
-    <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">ID: {{ task.id }}</p>
+    <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">ID: {{ model.id }}</p>
   </div>
 
   <!-- Status & Priority Row -->
@@ -32,7 +32,7 @@
     <label class="flex flex-col flex-1">
       <span class="text-slate-700 dark:text-slate-300 text-sm font-semibold mb-2 ml-1">Status</span>
       <div class="relative">
-        <select [(ngModel)]="task.status" class="form-select w-full rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 h-14 pl-4 pr-10 focus:ring-primary focus:border-primary appearance-none">
+        <select [(ngModel)]="model.status" class="form-select w-full rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 h-14 pl-4 pr-10 focus:ring-primary focus:border-primary appearance-none">
           <option value="new">New</option>
           <option value="active">Active</option>
           <option value="impediment">Impediment</option>
@@ -44,26 +44,17 @@
         </div>
       </div>
     </label>
-    <!-- Category Select -->
-    <label class="flex flex-col flex-1">
-      <span class="text-slate-700 dark:text-slate-300 text-sm font-semibold mb-2 ml-1">Category</span>
-      <div class="relative">
-        <select [(ngModel)]="task.categoryId" class="form-select w-full rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 h-14 pl-4 pr-10 focus:ring-primary focus:border-primary appearance-none">
-          <option [ngValue]="undefined">No Category</option>
-          <option *ngFor="let cat of categories" [ngValue]="cat.id">{{ cat.name }}</option>
-        </select>
-        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
-          <ion-icon name="grid-outline" class="text-xl"></ion-icon>
-        </div>
-      </div>
-    </label>
+
   </div>
 
   <!-- Assignee Section -->
-  <div class="mx-4 mt-2 mb-2 p-4 bg-white dark:bg-slate-900 rounded-xl flex items-center justify-between border border-slate-100 dark:border-slate-800">
+
+  <div
+    class="mx-4 mt-2 mb-2 p-4 bg-white dark:bg-slate-900 rounded-xl flex items-center justify-between border border-slate-100 dark:border-slate-800">
     <div class="flex items-center gap-4">
       <div class="bg-primary/10 flex items-center justify-center rounded-full h-12 w-12 overflow-hidden">
-        <img alt="Assignee" class="h-full w-full object-cover" data-alt="Close up portrait of a smiling professional man" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIDHYTyaT7D98R9EO3H-rBwehqt2lUUfzXqrYQw-QudNZ6fHYQj1-GM6839ePI5NAQGVtvKkJAhIFiYUUrg9sP2Qwqx39KzW-kAYX677kl-EuKnmjV2CpmWq0IkIQvuZ9YTG3if6WhAEilZqZ5IktAS5Lfs7AeRpxD2AkpnoBlOjP94R-hQpdt6wd3qBSg1b4ZGCbVddcca_leVq8uru0aE5aUGnpX4kQ193foU3RIUZZFETKMWH8L2aqWQz_3SoJANNpS5p7WqeY"/>
+        <img alt="Assignee" class="h-full w-full object-cover" data-alt="Close up portrait of a smiling professional man"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIDHYTyaT7D98R9EO3H-rBwehqt2lUUfzXqrYQw-QudNZ6fHYQj1-GM6839ePI5NAQGVtvKkJAhIFiYUUrg9sP2Qwqx39KzW-kAYX677kl-EuKnmjV2CpmWq0IkIQvuZ9YTG3if6WhAEilZqZ5IktAS5Lfs7AeRpxD2AkpnoBlOjP94R-hQpdt6wd3qBSg1b4ZGCbVddcca_leVq8uru0aE5aUGnpX4kQ193foU3RIUZZFETKMWH8L2aqWQz_3SoJANNpS5p7WqeY" />
       </div>
       <div class="flex flex-col">
         <p class="text-slate-500 dark:text-slate-400 text-xs font-medium uppercase tracking-wider">Assignee</p>
@@ -95,7 +86,7 @@
       </div>
       <div class="flex-1">
         <p class="text-slate-500 dark:text-slate-400 text-xs">Category</p>
-        <p class="text-slate-900 dark:text-slate-100 text-base font-medium">Product Design</p>
+        <p class="text-slate-900 dark:text-slate-100 text-base font-medium">{{ getCategoryName(model.categoryId) }}</p>
       </div>
     </div>
   </div>
@@ -105,7 +96,7 @@
     <h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold mb-3">Description</h3>
     <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
       <textarea
-        [(ngModel)]="task.description"
+        [(ngModel)]="model.description"
         rows="6"
         class="w-full bg-transparent text-slate-600 dark:text-slate-300 leading-relaxed text-sm border-none focus:ring-0 p-0 resize-none"
         placeholder="Add a description..."

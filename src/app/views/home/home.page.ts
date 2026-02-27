@@ -2,16 +2,16 @@ import { Component, inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
-  IonHeader, IonContent, IonFab, IonFabButton, IonIcon, ModalController
+  IonHeader, IonContent, IonFab, IonFabButton, IonIcon, ModalController, IonSearchbar
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { trashOutline, add, createOutline, menuOutline, searchOutline, notificationsOutline, ellipsisHorizontalOutline } from 'ionicons/icons';
+import { trashOutline, add, createOutline, menuOutline, searchOutline, notificationsOutline, ellipsisHorizontalOutline, closeOutline } from 'ionicons/icons';
 import { DataService } from '../../services/data.service';
 import { Task, Category, TaskStatus, TaskModel } from '../../models/task.model';
 import { TaskComponent } from '../../components/task/task.component';
 import { TaskEditComponent } from '@/components/task-edit/task-edit.component';
 import { TaskDetailComponent } from '@/components/task-detail/task-detail.component';
-import { RemoteConfigService } from '@/components/task-edit/remote-config.service';
+import { RemoteConfigService } from '@/services/remote-config.service';
 
 @Component({
   selector: 'app-home',
@@ -19,7 +19,7 @@ import { RemoteConfigService } from '@/components/task-edit/remote-config.servic
   styleUrls: ['home.page.scss'],
   standalone: true,
   imports: [
-    CommonModule, FormsModule, IonHeader,   IonContent, IonFab, IonFabButton, IonIcon, TaskComponent
+    CommonModule, FormsModule, IonHeader, IonContent, IonFab, IonFabButton, IonIcon, TaskComponent, IonSearchbar
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -30,6 +30,8 @@ export class HomePage {
   visibleTasks: Task[] = []; // Tareas filtradas por estado para la vista actual
   taskCounts: Record<string, number> = {}; // Conteo pre-calculado para las pestañas
 
+  showSearch: boolean = false;
+  searchQuery: string = '';
   newTaskTitle: string = '';
   selectedCategoryId: number | null = null; // Para nueva tarea
   filterCategoryId: number | null = null;   // Para filtrar lista
@@ -44,9 +46,7 @@ export class HomePage {
     { value: 'closed', label: 'Cerrado' }
   ];
 
-  isModalOpen: boolean = false;
   editingTask: Task | null = null;
-  isDetailModal: boolean = false; // Para diferenciar entre edición y detalle
   detailTask: Task | null = null;
   private dataService: DataService = inject(DataService);
   private remoteConfigService: RemoteConfigService = inject(RemoteConfigService);
@@ -55,7 +55,7 @@ export class HomePage {
   showAddTaskButton: boolean = true;
 
   constructor() {
-    addIcons({ trashOutline, add, createOutline, menuOutline, searchOutline, notificationsOutline, ellipsisHorizontalOutline });
+    addIcons({ trashOutline, add, createOutline, menuOutline, searchOutline, notificationsOutline, ellipsisHorizontalOutline, closeOutline });
   }
 
   async ionViewWillEnter() {
@@ -63,6 +63,7 @@ export class HomePage {
     this.categories = await this.dataService.getCategories();
     await this.remoteConfigService.initialize();
     this.showAddTaskButton = this.remoteConfigService.getEnableAddTask();
+    this.applyFilter();
     console.log('showAddTaskButton', this.showAddTaskButton)
     this.updateView();
     this.cdr.markForCheck();
@@ -73,7 +74,7 @@ export class HomePage {
     this.updateVisibleTasks();
   }
 
-  async addTask() {
+  async addTask(): Promise<void> {
     // Usamos editingTask para crear también
     if (!this.editingTask || !this.editingTask.title!.trim()) return;
 
@@ -86,8 +87,6 @@ export class HomePage {
 
     this.tasks.push(newTask);
     this.newTaskTitle = '';
-    this.editingTask = null;
-    this.isModalOpen = false;
     await this.dataService.saveTasks(this.tasks);
     this.updateView();
     this.cdr.markForCheck();
@@ -105,14 +104,20 @@ export class HomePage {
     this.updateView();
   }
 
-  async deleteTask(task: Task) {
+  /** Elimina una tarea de la lista y actualiza el almacenamiento.
+   * @param task La tarea a eliminar.
+   */
+  async deleteTask(task: Task): Promise<void> {
     this.tasks = this.tasks.filter(t => t.id !== task.id);
     await this.dataService.saveTasks(this.tasks);
     this.updateView();
     this.cdr.markForCheck();
   }
 
-  async openEditTask(task: Task) {
+  /** Abre el modal de edición para una tarea existente.
+   * @param task La tarea a editar.
+   */
+  async openEditTask(task: Task): Promise<void> {
     const modelEdit = await this.modalCtrl.create({
       component: TaskEditComponent,
       componentProps: {
@@ -124,7 +129,6 @@ export class HomePage {
     await modelEdit.present();
 
     const { data } = await modelEdit.onWillDismiss();
-    console.log('openEditTask', data)
     if (data?.task) {
       this.editingTask = data.task;
       this.saveEdit();
@@ -132,21 +136,18 @@ export class HomePage {
     }
   }
 
-  async openCreateTask() {
+  /** Abre el modal para crear una nueva tarea. */
+  async openCreateTask(): Promise<void> {
     const modalCreate = await this.modalCtrl.create({
       component: TaskEditComponent,
       componentProps: {
         categories: this.categories,
-        close: (event: Task) => {
-          console.log('openCreateTask', event)
-        }
       },
     })
 
     await modalCreate.present();
 
     const { data } = await modalCreate.onWillDismiss();
-    console.log('openCreateTask', data)
     if (data?.task) {
       this.editingTask = data.task;
       this.addTask();
@@ -154,8 +155,8 @@ export class HomePage {
     }
   }
 
-
-  async saveEdit() {
+  /** Guarda los cambios realizados en una tarea editada. */
+  async saveEdit(): Promise<void> {
     if (!this.editingTask) return;
 
     if (this.editingTask.id === '0') {
@@ -169,17 +170,32 @@ export class HomePage {
       await this.dataService.saveTasks(this.tasks);
       this.updateView();
     }
-    this.isModalOpen = false;
     this.editingTask = null;
     this.cdr.markForCheck();
   }
 
-  applyFilter() {
+  /** Aplica los filtros de categoría y búsqueda a la lista de tareas. */
+  applyFilter(): void {
+    let tasks = [...this.tasks];
+
+    // Filtro por categoría
     if (this.filterCategoryId) {
-      this.filteredTasks = this.tasks.filter(t => t.categoryId === this.filterCategoryId);
-    } else {
-      this.filteredTasks = [...this.tasks];
+      tasks = tasks.filter(t => t.categoryId === this.filterCategoryId);
     }
+
+    // Filtro por búsqueda (ID)
+    if (this.searchQuery && this.searchQuery.trim() !== '') {
+      tasks = tasks.filter(t => t.id.toString().includes(this.searchQuery));
+    }
+
+    this.filteredTasks = tasks;
+  }
+
+  /** Cierra el modal de búsqueda. */
+  closeSearch(): void {
+    this.showSearch = false;
+    this.searchQuery = '';
+    this.applyFilter();
   }
 
   updateView() {
@@ -207,6 +223,7 @@ export class HomePage {
     return task.id;
   }
 
+  /** Obtiene el color de un estado de tarea. */
   getStatusColor(status: TaskStatus): string {
     switch (status) {
       case 'backlog': return 'medium';
@@ -218,22 +235,20 @@ export class HomePage {
     }
   }
 
-  closeDetail() {
-    this.isDetailModal = false;
-    this.editingTask = null;
-  }
-
-  async openDetailTask(task: Task) {
+  /** Abre el modal de detalle de una tarea. */
+  async openDetailTask(task: Task): Promise<void> {
     const modalDetail = await this.modalCtrl.create({
       component: TaskDetailComponent,
       componentProps: {
         task,
-        categories: this.categories,
-        close: (event: Task) => {
-          console.log(event)
-        }
+        categories: this.categories
       }
     });
     await modalDetail.present()
+    const { data } = await modalDetail.onWillDismiss();
+    if (data?.task) {
+      this.editingTask = data.task;
+      this.saveEdit();
+    }
   }
 }
