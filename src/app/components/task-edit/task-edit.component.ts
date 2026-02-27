@@ -5,7 +5,7 @@ import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonIcon, ModalController, IonItem, IonList, IonSelect, IonSelectOption
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { arrowBackOutline, checkmarkOutline, chevronDownOutline, gridOutline } from 'ionicons/icons';
+import { arrowBackOutline, checkmarkOutline, chevronDownOutline, gridOutline, leaf } from 'ionicons/icons';
 import { Task, Category, TaskModel } from '../../models/task.model';
 
 @Component({
@@ -32,7 +32,7 @@ export class TaskEditComponent implements OnInit{
   });
 
   constructor() {
-    addIcons({ arrowBackOutline, checkmarkOutline, chevronDownOutline, gridOutline });
+    addIcons({ arrowBackOutline, checkmarkOutline, chevronDownOutline, gridOutline, leaf });
   }
 
   ngOnInit(): void {

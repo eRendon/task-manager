@@ -27,8 +27,9 @@
 
   <!-- Status & Category Row -->
   <div class=" px-4 py-3">
-    <ion-list class="flex flex-col flex-1">
-      <ion-item>
+    <div class="mb-3">
+      <ion-list>
+      <ion-item class="custom-select">
         <ion-select label="Estado" label-placement="floating" fill="outline"
           [(ngModel)]="model.status">
           <ion-select-option value="new">Nuevo</ion-select-option>
@@ -39,8 +40,10 @@
         </ion-select>
       </ion-item>
     </ion-list>
-    <ion-list class="flex flex-col flex-1">
-      <ion-item>
+    </div>
+    <div class="mb-5">
+      <ion-list>
+      <ion-item class="custom-select">
         <ion-select label="Categoría" label-placement="floating" fill="outline"
           [(ngModel)]="model.categoryId">
           <ion-select-option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</ion-select-option>
@@ -48,8 +51,9 @@
         </ion-select>
       </ion-item>
     </ion-list>
-    <ion-list class="flex flex-col flex-1">
-      <ion-item>
+    </div>
+    <ion-list>
+      <ion-item class="custom-select">
         <ion-select label="Prioridad" label-placement="floating" fill="outline"
           [(ngModel)]="model.priority">
           <ion-select-option value="low">Baja</ion-select-option>
