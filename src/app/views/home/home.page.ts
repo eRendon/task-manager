@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -21,11 +21,14 @@ import { RemoteConfigService } from '@/components/task-edit/remote-config.servic
   imports: [
     CommonModule, FormsModule, IonHeader,   IonContent, IonFab, IonFabButton, IonIcon, TaskComponent
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HomePage {
   tasks: Task[] = [];
   categories: Category[] = [];
   filteredTasks: Task[] = [];
+  visibleTasks: Task[] = []; // Tareas filtradas por estado para la vista actual
+  taskCounts: Record<string, number> = {}; // Conteo pre-calculado para las pestañas
 
   newTaskTitle: string = '';
   selectedCategoryId: number | null = null; // Para nueva tarea
@@ -48,6 +51,7 @@ export class HomePage {
   private dataService: DataService = inject(DataService);
   private remoteConfigService: RemoteConfigService = inject(RemoteConfigService);
   private modalCtrl: ModalController = inject(ModalController);
+  private cdr = inject(ChangeDetectorRef);
   showAddTaskButton: boolean = true;
 
   constructor() {
@@ -60,11 +64,13 @@ export class HomePage {
     await this.remoteConfigService.initialize();
     this.showAddTaskButton = this.remoteConfigService.getEnableAddTask();
     console.log('showAddTaskButton', this.showAddTaskButton)
-    this.applyFilter();
+    this.updateView();
+    this.cdr.markForCheck();
   }
 
   setActiveStatus(status: TaskStatus) {
     this.activeStatus = status;
+    this.updateVisibleTasks();
   }
 
   async addTask() {
@@ -83,23 +89,27 @@ export class HomePage {
     this.editingTask = null;
     this.isModalOpen = false;
     await this.dataService.saveTasks(this.tasks);
-    this.applyFilter();
+    this.updateView();
+    this.cdr.markForCheck();
   }
 
   async toggleTask(task: Task) {
     task.status = task.completed ? 'closed' : 'active';
     await this.dataService.saveTasks(this.tasks);
+    this.updateView(); // Actualizar para mover la tarea si cambia de estado
   }
 
   async onStatusChange(task: Task) {
     task.completed = task.status === 'closed';
     await this.dataService.saveTasks(this.tasks);
+    this.updateView();
   }
 
   async deleteTask(task: Task) {
     this.tasks = this.tasks.filter(t => t.id !== task.id);
     await this.dataService.saveTasks(this.tasks);
-    this.applyFilter();
+    this.updateView();
+    this.cdr.markForCheck();
   }
 
   async openEditTask(task: Task) {
@@ -118,6 +128,7 @@ export class HomePage {
     if (data?.task) {
       this.editingTask = data.task;
       this.saveEdit();
+      this.cdr.markForCheck();
     }
   }
 
@@ -139,6 +150,7 @@ export class HomePage {
     if (data?.task) {
       this.editingTask = data.task;
       this.addTask();
+      this.cdr.markForCheck();
     }
   }
 
@@ -155,10 +167,11 @@ export class HomePage {
     if (index !== -1) {
       this.tasks[index] = this.editingTask;
       await this.dataService.saveTasks(this.tasks);
-      this.applyFilter();
+      this.updateView();
     }
     this.isModalOpen = false;
     this.editingTask = null;
+    this.cdr.markForCheck();
   }
 
   applyFilter() {
@@ -169,13 +182,29 @@ export class HomePage {
     }
   }
 
+  updateView() {
+    this.applyFilter();
+    this.updateVisibleTasks();
+    this.updateTaskCounts();
+  }
+
+  updateVisibleTasks() {
+    this.visibleTasks = this.filteredTasks.filter(t => t.status === this.activeStatus);
+  }
+
+  updateTaskCounts() {
+    this.columns.forEach(col => {
+      this.taskCounts[col.value] = this.filteredTasks.filter(t => t.status === col.value).length;
+    });
+  }
+
   getCategoryName(id?: number): string {
     if (!id) return '';
     return this.categories.find(c => c.id === id)?.name || '';
   }
 
-  getTasksByStatus(status: TaskStatus): Task[] {
-    return this.filteredTasks.filter(t => t.status === status);
+  trackByTask(index: number, task: Task): string {
+    return task.id;
   }
 
   getStatusColor(status: TaskStatus): string {
